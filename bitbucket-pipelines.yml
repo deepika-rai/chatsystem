@@ -1,0 +1,41 @@
+#  Template NodeJS build
+#  This template allows you to validate your NodeJS code.
+#  The workflow allows running tests and code linting on the default branch.
+image: node:16
+pipelines:
+  branches:
+    master:
+      - step:
+          clone:
+            enabled: false
+          deployment: staging
+          script:
+            - echo "------> Ready to deploy <------"
+      - step:
+          clone:
+            enabled: false
+          deployment: production
+          trigger: manual
+          script:
+            - pipe: atlassian/ssh-run:0.4.1
+              variables:
+                SSH_USER: "root"
+                SERVER: "103.25.130.33"
+                SSH_KEY: $MY_SSH_KEY
+                MODE: "command"
+                PORT: "5726"
+                COMMAND: "cd /www/wwwroot/apnidiary.com/ && ./pull.sh" # path to a script in your repository
+    develop:
+      - step:
+          clone:
+            enabled: false
+          deployment: staging
+          script:
+            - pipe: atlassian/ssh-run:0.4.1
+              variables:
+                SSH_USER: "root"
+                SERVER: "103.252.193.127"
+                SSH_KEY: $qa_ssh_key
+                MODE: "command"
+                PORT: "8824"
+                COMMAND: "cd /www/wwwroot/beta.apnidiary.com/ && ./pull.sh" # path to a script in your repository

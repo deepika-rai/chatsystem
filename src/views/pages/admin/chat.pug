@@ -1,0 +1,464 @@
+extends ../../layouts/main
+
+block content
+  style.
+    .chat-wrap { display: flex; height: calc(100vh - 230px); min-height: 480px; }
+    .chat-side { width: 320px; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; flex-shrink: 0; }
+    .chat-search { padding: 10px; border-bottom: 1px solid #e5e7eb; }
+    .chat-list { overflow-y: auto; flex: 1; }
+    .chat-item { display: flex; gap: 10px; padding: 12px; text-decoration: none; color: inherit; border-bottom: 1px solid #f3f4f6; align-items: center; }
+    .chat-item:hover, .chat-item.active { background: #f3f4f6; }
+    .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .chat-avatar-text { background: #d1d5db; color: #374151; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
+    .chat-meta { min-width: 0; flex: 1; }
+    .chat-title { font-weight: 600; display: flex; justify-content: space-between; gap: 6px; }
+    .chat-title small { font-weight: 400; white-space: nowrap; }
+    .chat-last { font-size: 13px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .unread-dot { width: 9px; height: 9px; background: #2563eb; border-radius: 50%; flex-shrink: 0; }
+    .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .chat-head { padding: 12px 16px; border-bottom: 1px solid #e5e7eb; display: flex; gap: 10px; align-items: center; }
+    .chat-body { flex: 1; overflow-y: auto; padding: 16px; background: #f9fafb; display: flex; flex-direction: column; gap: 8px; }
+    .msg { max-width: 65%; padding: 8px 12px; border-radius: 12px; background: #fff; border: 1px solid #e5e7eb; word-break: break-word; }
+    .msg.mine { align-self: flex-end; background: #dbeafe; border-color: #bfdbfe; }
+    .msg .sender { font-size: 12px; font-weight: 600; color: #374151; }
+    .msg small { display: block; font-size: 11px; color: #6b7280; margin-top: 2px; }
+    .chat-form { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #e5e7eb; }
+    .chat-empty { margin: auto; color: #6b7280; text-align: center; }
+    .user-row { display: flex; gap: 10px; align-items: center; padding: 8px; cursor: pointer; border-radius: 6px; }
+    .user-row:hover { background: #f3f4f6; }
+    @media (max-width: 768px) {
+      .chat-side { width: 100%; }
+      .chat-main { display: none; }
+      .has-active .chat-side { display: none; }
+      .has-active .chat-main { display: flex; }
+    }
+
+  - const timeFmt = (d) => d ? new Date(d).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''
+
+  mixin avatar(src, name)
+    if src
+      img.chat-avatar(src=`/assets/userimages/${src}` alt="")
+    else
+      span.chat-avatar.chat-avatar-text= (name || '?').charAt(0).toUpperCase()
+
+  section.dashboard-main-content
+    .breadcrumb-arae-bxo.d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
+      .breadcrumb-icon-box.d-flex.gap-3.align-items-center
+        a.icon-box-in-top(href="javascript:void(0)" data-bs-placement="top" tabindex="0" title="Chat")
+          i.bi.bi-chat-dots
+        a.breadcrumb-icon-box.text-black(href="javascript:void(0)" data-bs-placement="top" tabindex="0" title="Chat")
+          | Chat
+      .d-flex.align-items-center.gap-4.justify-content-end.flex-wrap
+        .total-lead-inner-bxo
+          h4 Total Chats:
+          span.lead-count-box
+            if chats && chats.length
+              | #{chats.length}
+            else
+              | 0
+        a.hero-btn.common-btn.warpper-btn.text-white#newChatBtn(href="javascript:void(0)" title="New Chat")
+          i.bi.bi-plus-lg.me-1
+          | New Chat
+
+    .row
+      .col-xl-12.col-lg-12
+        .panel.mb-g
+          .panel-body.p-0
+            .chat-wrap(class=activeChat ? 'has-active' : '')
+
+              //- ============ SIDEBAR ============
+              aside.chat-side
+                .chat-search
+                  input#chatFilter.form-control(type="text" placeholder="Search chats")
+                .chat-list#chatList
+                  if chats && chats.length
+                    each chat in chats
+                      a.chat-item(href=`/chat/${chat.id}` data-title=(chat.title || '').toLowerCase() class=(activeChat && activeChat.id === chat.id) ? 'active' : '')
+                        +avatar(chat.avatar, chat.title)
+                        .chat-meta
+                          .chat-title
+                            span= chat.title
+                            small.text-muted= timeFmt(chat.lastMessageAt)
+                          .chat-last
+                            if chat.lastMessage
+                              | #{chat.lastMessage}
+                            else
+                              | No messages yet
+                        if chat.hasUnread
+                          span.unread-dot
+                  else
+                    p.text-center.text-muted.p-4 No chats yet. Click "New Chat" to start one.
+
+              //- ============ MESSAGE PANE ============
+              section.chat-main
+                if activeChat
+                  .chat-head
+                    +avatar(activeChat.avatar, activeChat.title)
+                    div
+                      strong= activeChat.title
+                      if activeChat.type === 'group'
+                        .text-muted(style="font-size:12px") #{activeChat.members.length} members
+                      else
+                        .text-muted#lastSeenLabel(style="font-size:11px;color:#6b7280;") &nbsp;
+                  #messages.chat-body
+                    p.chat-empty#emptyMsg Loading messages...
+                  form.chat-form#sendForm(autocomplete="off")
+                    input#msgInput.form-control(type="text" placeholder="Type a message" maxlength="2000")
+                    button.hero-btn.common-btn.warpper-btn.text-white(type="submit")
+                      i.bi.bi-send.me-1
+                      | Send
+                else
+                  .chat-empty
+                    i.bi.bi-chat-dots(style="font-size:40px")
+                    h5.mt-2 Select a chat
+                    p Pick a conversation from the left or start a new one.
+
+    //- ============ NEW CHAT MODAL ============
+    .modal.fade#newChatModal(tabindex='-1' aria-hidden='true')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title Start New Chat
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            input#userSearch.form-control.mb-2(type="text" placeholder="Search user by name")
+            #userResults
+              p.text-muted.text-center.m-0 Type a name to search
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+
+block scripts
+  script.
+    var CHAT_ID = !{JSON.stringify(id || null)};
+    var MY_ID = !{JSON.stringify(typeof myId !== 'undefined' ? myId : null)};
+
+    // ---------- Filter chat list (client side) ----------
+    var filterInput = document.getElementById('chatFilter');
+    if (filterInput) {
+      filterInput.addEventListener('input', function () {
+        var q = filterInput.value.trim().toLowerCase();
+        document.querySelectorAll('#chatList .chat-item').forEach(function (el) {
+          el.style.display = el.getAttribute('data-title').indexOf(q) > -1 ? '' : 'none';
+        });
+      });
+    }
+
+    // ---------- New chat modal ----------
+    var newChatModal = new bootstrap.Modal(document.getElementById('newChatModal'));
+    var userSearch = document.getElementById('userSearch');
+    var userResults = document.getElementById('userResults');
+    var searchTimer = null;
+
+    document.getElementById('newChatBtn').addEventListener('click', function () {
+      userSearch.value = '';
+      loadUsers('');
+      newChatModal.show();
+    });
+
+    userSearch.addEventListener('input', function () {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function () { loadUsers(userSearch.value.trim()); }, 300);
+    });
+
+    function loadUsers(q) {
+      fetch('/chat/users/search?q=' + encodeURIComponent(q))
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          userResults.innerHTML = '';
+          if (!data.success || !data.data.length) {
+            userResults.innerHTML = '<p class="text-muted text-center m-0">No users found</p>';
+            return;
+          }
+          data.data.forEach(function (u) {
+            var row = document.createElement('div');
+            row.className = 'user-row';
+
+            var av = document.createElement(u.profile ? 'img' : 'span');
+            av.className = 'chat-avatar' + (u.profile ? '' : ' chat-avatar-text');
+            if (u.profile) av.src = '/assets/userimages/' + u.profile;
+            else av.textContent = (u.name || '?').charAt(0).toUpperCase();
+
+            var info = document.createElement('div');
+            var nm = document.createElement('strong');
+            nm.textContent = u.name;
+            var rl = document.createElement('div');
+            rl.className = 'text-muted';
+            rl.style.fontSize = '12px';
+            rl.textContent = u.role;
+            info.appendChild(nm);
+            info.appendChild(rl);
+
+            row.appendChild(av);
+            row.appendChild(info);
+            row.addEventListener('click', function () { startChat(u.id); });
+            userResults.appendChild(row);
+          });
+        })
+        .catch(function (err) {
+          console.error(err);
+          userResults.innerHTML = '<p class="text-danger text-center m-0">Failed to load users</p>';
+        });
+    }
+
+    function startChat(userId) {
+      fetch('/chat/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userId })
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.success) window.location.href = data.redirect;
+          else alert(data.message || 'Could not start chat');
+        })
+        .catch(function (err) {
+          console.error(err);
+          alert('Something went wrong. Please try again.');
+        });
+    }
+
+    // ---------- Message pane ----------
+    var messagesEl = document.getElementById('messages');
+    var sendForm = document.getElementById('sendForm');
+    var lastSeenLabel = document.getElementById('lastSeenLabel');
+    var pollTimer = null;
+    var lastMsgCount = 0;
+    var lastSeenData = {};    // { "userId": { lastSeenMessageId, lastSeenAt } }
+    var renderedMsgIds = [];  // ordered list of message IDs in DOM (chronological)
+    var readObserver = null;  // IntersectionObserver to auto-mark visible messages as read
+
+    // ---- Helpers ----
+
+    function timeAgo(isoStr) {
+      if (!isoStr) return '';
+      var diff = Math.floor((Date.now() - new Date(isoStr).getTime()) / 1000);
+      if (diff < 10)  return 'just now';
+      if (diff < 60)  return diff + 's ago';
+      var m = Math.floor(diff / 60);
+      if (m < 60)     return m + 'm ago';
+      var h = Math.floor(m / 60);
+      if (h < 24)     return 'today ' + new Date(isoStr).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      if (h < 48)     return 'yesterday ' + new Date(isoStr).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      return new Date(isoStr).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ---- Build a message bubble ----
+    function appendMessage(msg) {
+      var empty = document.getElementById('emptyMsg');
+      if (empty) empty.remove();
+
+      var isMine = String(msg.senderId) === String(MY_ID);
+
+      var box = document.createElement('div');
+      box.className = 'msg' + (isMine ? ' mine' : '');
+      box.setAttribute('data-msg-id', msg.id);
+
+      if (!isMine && msg.senderName) {
+        var s = document.createElement('div');
+        s.className = 'sender';
+        s.textContent = msg.senderName;
+        box.appendChild(s);
+      }
+
+      var t = document.createElement('div');
+      t.textContent = msg.text;
+      box.appendChild(t);
+
+      var meta = document.createElement('div');
+      meta.style.cssText = 'display:flex;justify-content:flex-end;align-items:center;gap:4px;margin-top:2px;';
+
+      var time = document.createElement('small');
+      time.textContent = msg.createdAt
+        ? new Date(msg.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+        : '';
+      meta.appendChild(time);
+
+      if (isMine) {
+        // single grey tick by default; turns blue double-tick when read
+        var tick = document.createElement('small');
+        tick.className = 'msg-tick';
+        tick.setAttribute('data-msg-id', msg.id);
+        tick.style.cssText = 'font-size:12px;color:#9ca3af;line-height:1;';
+        tick.textContent = '✓';
+        meta.appendChild(tick);
+      }
+
+      box.appendChild(meta);
+      messagesEl.appendChild(box);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      if (msg.id) {
+        renderedMsgIds.push(msg.id);
+        // observe non-mine messages so we can mark them read when they scroll into view
+        if (!isMine && readObserver) readObserver.observe(box);
+      }
+    }
+
+    // ---- Tick refresh: grey ✓ vs blue ✓✓ ----
+    function refreshTicks() {
+      // build a map: msgId → Set of userIds who have read it
+      var readMap = {};
+      Object.entries(lastSeenData).forEach(function(entry) {
+        var uid = entry[0], val = entry[1];
+        if (String(uid) === String(MY_ID) || !val.lastSeenMessageId) return;
+        // everyone up to their lastSeenMessageId has been seen
+        var idx = renderedMsgIds.indexOf(val.lastSeenMessageId);
+        if (idx === -1) return;
+        for (var i = 0; i <= idx; i++) {
+          if (!readMap[renderedMsgIds[i]]) readMap[renderedMsgIds[i]] = new Set();
+          readMap[renderedMsgIds[i]].add(uid);
+        }
+      });
+
+      document.querySelectorAll('.msg-tick').forEach(function(el) {
+        var msgId = el.getAttribute('data-msg-id');
+        if (readMap[msgId] && readMap[msgId].size > 0) {
+          el.textContent = '✓✓';
+          el.style.color = '#2563eb'; // blue = read by at least one other
+        } else {
+          el.textContent = '✓';
+          el.style.color = '#9ca3af'; // grey = delivered, not yet read
+        }
+      });
+    }
+
+    // ---- Last seen label in chat header (WhatsApp style) ----
+    function refreshLastSeenLabel() {
+      if (!lastSeenLabel) return;
+      // find the other person in a direct chat (everyone except me)
+      var others = Object.entries(lastSeenData).filter(function(e) {
+        return String(e[0]) !== String(MY_ID);
+      });
+      if (!others.length) { lastSeenLabel.textContent = ''; return; }
+      // show the most recent lastSeenAt among all others
+      var latest = others.reduce(function(best, e) {
+        return (!best || new Date(e[1].lastSeenAt) > new Date(best.lastSeenAt)) ? e[1] : best;
+      }, null);
+      if (latest && latest.lastSeenAt) {
+        lastSeenLabel.textContent = 'last seen ' + timeAgo(latest.lastSeenAt);
+      } else {
+        lastSeenLabel.textContent = '';
+      }
+    }
+
+    // ---- Mark a message as read (fire-and-forget) ----
+    var pendingRead = new Set(); // avoid duplicate calls
+    function markRead(messageId) {
+      if (!messageId || !CHAT_ID || pendingRead.has(messageId)) return;
+      pendingRead.add(messageId);
+      fetch('/api/chat/' + CHAT_ID + '/message/' + messageId + '/read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(function(err) {
+        pendingRead.delete(messageId); // allow retry on network error
+        console.error('markRead error:', err);
+      });
+    }
+
+    // ---- IntersectionObserver: auto-mark non-mine messages as read when visible ----
+    if (typeof IntersectionObserver !== 'undefined') {
+      readObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var msgId = entry.target.getAttribute('data-msg-id');
+            if (msgId) markRead(msgId);
+          }
+        });
+      }, { root: messagesEl, threshold: 0.5 });
+    }
+
+    // ---- Explicit lastSeen POST ----
+    function postLastSeen(messageId) {
+      if (!CHAT_ID || !messageId) return;
+      fetch('/api/chat/lastseen/' + CHAT_ID, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId: messageId })
+      }).catch(function(err) { console.error('postLastSeen error:', err); });
+    }
+
+    function showNoMessages() {
+      messagesEl.innerHTML = '<p class="chat-empty" id="emptyMsg">No messages yet. Say hello!</p>';
+    }
+
+    // ---- Fetch lastSeen + refresh ticks + header label ----
+    function fetchLastSeen() {
+      if (!CHAT_ID) return;
+      fetch('/api/chat/last-seen/' + CHAT_ID)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (!data.success) return;
+          lastSeenData = data.data || {};
+          refreshTicks();
+          refreshLastSeenLabel();
+        })
+        .catch(function(err) { console.error('lastSeen fetch error:', err); });
+    }
+
+    // ---- Load messages ----
+    function loadMessages() {
+      if (!CHAT_ID) return;
+      fetch('/api/chat/messages/' + CHAT_ID)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (!data.success) return;
+          var msgs = data.data || [];
+          if (msgs.length === lastMsgCount) {
+            fetchLastSeen(); // still refresh ticks even if no new messages
+            return;
+          }
+          lastMsgCount = msgs.length;
+          messagesEl.innerHTML = '';
+          renderedMsgIds = [];
+          if (!msgs.length) { showNoMessages(); return; }
+          msgs.forEach(function(m) { appendMessage(m); });
+
+          // mark our last seen as the last message in the list
+          var lastMsg = msgs[msgs.length - 1];
+          if (lastMsg && lastMsg.id) postLastSeen(lastMsg.id);
+
+          fetchLastSeen();
+        })
+        .catch(function(err) { console.error('loadMessages error:', err); });
+    }
+
+    if (messagesEl && CHAT_ID) {
+      loadMessages();
+      pollTimer = setInterval(loadMessages, 3000);
+
+      sendForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var input = document.getElementById('msgInput');
+        var text = input.value.trim();
+        if (!text) return;
+
+        var btn = sendForm.querySelector('button[type="submit"]');
+        btn.disabled = true;
+
+        fetch('/api/chat/messages/' + CHAT_ID, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text })
+        })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.success) {
+              input.value = '';
+              appendMessage(data.data);
+              lastMsgCount += 1;
+              // sender's lastSeen is updated server-side, but refresh UI
+              fetchLastSeen();
+            } else {
+              alert(data.message || 'Failed to send message');
+            }
+          })
+          .catch(function(err) {
+            console.error('send error:', err);
+            alert('Could not send message. Please try again.');
+          })
+          .finally(function() {
+            btn.disabled = false;
+            input.focus();
+          });
+      });
+    }

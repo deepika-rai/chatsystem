@@ -1,0 +1,117 @@
+extends ../../layouts/main
+
+block content
+  section.dashboard-main-content
+    .breadcrumb-arae-bxo.d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
+      .breadcrumb-icon-box.d-flex.gap-3.align-items-center
+        a.icon-box-in-top(href="javascript:void(0)" data-bs-placement="top" tabindex="0" title="Customer") 
+          i.bi.bi-people
+        a.breadcrumb-icon-box.text-black(href="javascript:void(0)" data-bs-placement="top" tabindex="0" title="user")
+          | Archived Users
+      .d-flex.align-items-center.gap-4.justify-content-end.flex-wrap
+        .total-lead-inner-bxo
+          h4 Total Archived Users:
+          span.lead-count-box 
+            if users && users.length
+              | #{users.length}
+            else
+              | 0
+        a.hero-btn.common-btn.warpper-btn.text-white(href="/user/list" title="User List")
+          i.bi.bi-list.me-1
+          | User List
+
+    .row
+      .col-xl-12.col-lg-12
+        .panel.mb-g
+          .panel-heading
+          .panel-body
+            .product-status
+              .table-responsive.table-size
+                table#pagination.table.table-bordered.table-striped.align-middle
+                  thead.table-bg-warpper
+                    tr
+                      th.text-start #
+                      th.text-start Name
+                      th.text-start Email
+                      th.text-start Phone
+                      th.text-start Status
+                      th.text-start Action
+                  tbody.table-bg-warpper-inner
+                    if users && users.length
+                      each data, i in users
+                        tr
+                          td.text-start #{i + 1}
+                          
+                          // User Name
+                          td.text-start
+                            div 
+                              a(href=`/report/inventory/${data.id}`) 
+                                if data.name
+                                  | #{data.name}
+                                else
+                                  | N/A
+
+                          // Email
+                          td.text-start
+                            if data.email
+                              | #{data.email}
+                            else
+                              | N/A
+
+                          // Phone
+                          td.text-start
+                            if data.phone
+                              | #{data.phone}
+                            else
+                              | N/A                                     
+                          
+                          // Status
+                          td.text-start
+                            if data.status === 'active'
+                              span.table-status-btn Active
+                            else
+                              span.inactive-status Inactive
+                          
+                          // Actions
+                          td.text-start
+                            .d-flex.justify-content-center.align-items-center.gap-2
+                              a(href='#' data-bs-toggle='modal' data-bs-target=`#deleteModal-${data.id}` title='Delete')
+                                i.bi.bi-trash.text-danger
+                              a(href='#' data-bs-toggle='modal' data-bs-target=`#revertModal-${data.id}` title='Revert User')
+                                i.bi.bi-bootstrap-reboot.text-success
+                          
+                        // Delete Modal
+                        .modal.fade(id=`deleteModal-${data.id}` tabindex='-1' aria-labelledby=`deleteModalLabel-${data.id}` aria-hidden='true')
+                          .modal-dialog.modal-dialog-centered
+                            .modal-content.border-danger
+                              .modal-header.bg-danger.text-white
+                                h5.modal-title(id=`deleteModalLabel-${data.id}`) ⚠ Warning!
+                                button.btn-close.btn-close-white(type='button' data-bs-dismiss='modal' aria-label='Close')
+                              .modal-body.text-center
+                                img(src="/assets/images/deleteLogo.png", alt="trash", style="width:60px; height:auto; margin-bottom:15px;")
+                                p.text-danger.fs-5 Are you sure you want to delete user <b>#{data.name}</b>?
+                                p.text-danger This action is <b>permanent</b> and cannot be reverted!
+                              .modal-footer.justify-content-center
+                                button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+                                a.btn.btn-danger(href=`/user/permanent-delete/${data.id}`) Delete
+
+                        // Revert Modal 
+                        .modal.fade(id=`revertModal-${data.id}` tabindex='-1' aria-labelledby=`revertModalLabel-${data.id}` aria-hidden='true')
+                          .modal-dialog.modal-dialog-centered
+                            .modal-content
+                              .modal-header
+                                h5.modal-title(id=`revertModalLabel-${data.id}`) Confirm Revert
+                                button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+                              .modal-body.modal-body-inner
+                                img(src="/assets/images/revert.png", alt="Revert", style="width:150px; height: auto;")
+                                p(style="word-wrap: break-word; white-space: normal;") 
+                                  | Are you sure you want to <b>Revert</b> the user <b>#{data.name}</b> back to User List?
+                              .modal-footer
+                                a.btn.btn-success(href=`/user/revert/${data.id}`) Revert
+                                button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+
+                    else
+                      tr
+                        td.text-center(colspan="8") No records found
+
+  

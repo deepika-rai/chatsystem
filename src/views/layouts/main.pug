@@ -1,0 +1,76 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0, shrink-to-fit=no")
+    meta(name="theme-color", content="#0EA5E9")
+    title Sanchay
+    link(rel="shortcut icon", href="/assets/images/books.png")
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin="")
+    link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Inter:wght@300;400;500;600;700&display=swap")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
+
+    link(rel="stylesheet", href="/assets/css/main.css")
+    link(rel="stylesheet", href="/assets/css/style.css")
+    link(rel="stylesheet", href="/assets/css/pagination.css")
+    link(rel="stylesheet", href="/assets/css/dataTables.css")
+    link(rel="stylesheet", href="https://tom-select.js.org//css/tom-select.default.css")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css")
+    script(src='https://code.jquery.com/jquery-3.6.0.min.js')
+    script.
+      $(document).ready(function() {
+          const firstRow = $('#pagination tbody tr:first td');
+          const isRealData = !(firstRow.length === 1 && firstRow.attr('colspan'));
+
+          if (isRealData) {
+            new DataTable('#pagination', {
+              autoWidth: false,
+              responsive: true
+            });
+          }
+        });
+
+  body
+    .container-fluid
+      include ../partials/sidebar
+      //- Mobile sidebar overlay backdrop
+      #sidebarOverlay.sidebar-overlay
+      include ../partials/header
+      .main-content
+        //- Flash Messages
+        if success.length > 0
+          each msg in success
+            .alert.alert-success(role="alert")= msg
+
+        if error.length > 0
+          each msg in error
+            .alert.alert-danger(role="alert")= msg
+        block content
+
+    // Scripts
+    script(src='https://cdn.datatables.net/2.3.2/js/dataTables.js')
+    //- script(src='https://code.jquery.com/jquery-3.6.0.min.js')
+    script(src="https://cdn.jsdelivr.net/npm/apexcharts")
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js")
+    script(src="/assets/js/main.js")
+    script(src='https://code.jquery.com/jquery-3.6.0.min.js')
+    script(src='https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js')
+    script.
+      ['#category', '#hsn_code', '#per_unit', '#unit','#catg_id','#item_unit'].forEach(function(sel) {
+        var el = document.querySelector(sel);
+        if (el && !el.tomselect) new TomSelect(sel);
+      });
+     script.
+      $(document).ready(function () {
+        $("p, li, h1, h2, h3, h4, h5, h6, a, span, td").each(function () {
+          let text = $(this).text().trim();
+          if (text.length > 0) {
+            $(this).text(text.charAt(0).toUpperCase() + text.slice(1));
+          }
+        });
+      });
+    block scripts
+    

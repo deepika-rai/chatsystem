@@ -1,0 +1,290 @@
+extends ../../layouts/main
+
+block content
+  .user-profile-inner-pages
+    .breadcrumb-arae-bxo.d-flex.gap-2.align-items-center.mb-2
+      a.breadcrumb-icon-box.text-black(href="javascript:void(0)" data-bs-placement='top' tabindex='0' title="leads Product")
+        span
+          b Upniva Profile
+
+    .row
+      .col-md-12.user-profile-aere.user-profile-card
+        .row.tab-content-box
+          .col-md-6.col-lg-6
+            .user-detail-box
+              .text-center.d-flex.flex-column.align-items-center
+                img.profile-img(src="https://i.pinimg.com/736x/c8/f4/5a/c8f45ad20cedf2566579e06715898944.jpg", alt="profile", width="120")
+                h5.mt-2.mb-1= elite.company_name
+
+              .user-detail-text-box.flex-grow-1
+                .mb-2.d-flex
+                  strong.text-muted(style="min-width: 160px") User ID:
+                  span.text-right UPN #{elite.id}
+                .mb-2.d-flex
+                  strong.text-muted(style="min-width: 160px") Elite Name.:
+                  span= -
+                //- .mb-2.d-flex
+                //-   strong.text-muted(style="min-width: 160px") Mobile No.:
+                //-   span= elite.mobile
+                .mb-2.d-flex
+                  strong.text-muted(style="min-width: 160px") Address:
+                  span= company.office_address
+                .mb-2.d-flex
+                  strong.text-muted(style="min-width: 160px") Contact Person:
+                  span= elite.full_name
+                .mb-2.d-flex
+                  strong.text-muted(style="min-width: 160px") Contact Person Email:
+                  span= elite.email
+                .mb-2.d-flex
+                  strong.text-muted(style="min-width: 160px") Cont. Person Mob. No:
+                  span= elite.mobile
+
+          .col-md-6.col-lg-5
+            .row.mb-3
+               each summary, idx in summaryData
+                .col-md-4.col-lg-3.col-sm-3.col-6
+                  .summary-box.mb-2
+                    span.total-content-box-hdf= summary.label
+                    span.text-dark= summary.val
+
+        .col-md-12.mt-3
+          .franchise-summary-row.d-flex.flex-wrap.p-2
+            each stat in ["GOLD","PLATINUM","SILVER","DIAMOND","AGENT","EMPLOYEE","TOTAL"]
+              .summary-box.text-center.p-2.mx-1.mb-1.btn-secondary-light
+                div(style="font-size:12px;")
+                  span.text-secondary= stat + ":"
+                  span.text-dark 1000
+
+      .profile-datitel-content-box.container.mt-4
+        .row
+          .col-md-2
+            ul.nav.nav-pills.flex-column(role="tablist" id="myTab")
+              each tab in [{id:"about",label:"About"},{id:"document",label:"Document"},{id:"permission",label:"Permission"}]
+                li.nav-item.mb-3
+                  button.nav-link.border.rounded.px-4.py-2.w-100.text-start(
+                    id=`${tab.id}-tab`,
+                    data-bs-toggle="tab",
+                    data-bs-target=`#${tab.id}`,
+                    type="button",
+                    role="tab",
+                    aria-controls=tab.id,
+                    aria-selected=tab.id === "about" ? "true" : "false",
+                    class=tab.id === "about" ? "active" : ""
+                  )= tab.label
+
+          .col-md-9
+            .tab-content.border.p-4.rounded.shadow-sm.bg-white
+              .tab-pane.fade.show.active#about(role="tabpanel", aria-labelledby="about-tab")
+                h5.mb-3.text-dark
+                  p.text-muted But I must explain...
+
+              .tab-pane.fade#document(role="tabpanel", aria-labelledby="document-tab")
+                h5.mb-3.text-dark
+                .form-check.form-check-inline.mb-2
+                  input.form-check-input(type="radio", name="status", id="active", value="active", checked)
+                  label.form-check-label(for="active") KYC Document
+                .form-check.form-check-inline.mb-3
+                  input.form-check-input(type="radio", name="status", id="inactive", value="inactive")
+                  label.form-check-label(for="inactive") Others
+
+                .document-list.d-flex.flex-column.gap-3
+                  if documentData && documentData.length
+                    each doc in documentData
+                     .document-item.border-bottom.pb-2
+                      strong= doc.name || N/A
+                      if doc.createdAt
+                        div.text-muted.small 
+                          | Uploaded on: 
+                          = new Date(doc.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+                      if doc.url
+                        a.d-block.mt-1(href=doc.url, target="_blank") View Document   
+                    else
+                      .text-muted No documents submitted yet.     
+              //- //nmjndfjsfnds
+              .tab-pane.fade#permission(role="tabpanel", aria-labelledby="permission-tab")
+                    h5.text-dark.mb-3 Permissions    
+                    - var isChecked = function(id) { return updatedRoleServices.includes(String(id)); };
+                    form#employeeFilterForm(method='post' action='/admin/save-permissions')
+                      input(type="hidden" name="userid" value=userid)
+
+                      each service, sIndex in nestedServices
+                        - const parentId = `parent-${sIndex}`
+                        - var showParent = false;
+                        - if (service.childs) {
+                            - for (var c of service.childs) {
+                                - if (isChecked(String(c.id))) { showParent = true; break; }
+                                - if (c.childs) {
+                                    - for (var cc of c.childs) {
+                                        - if (isChecked(String(cc.id))) { showParent = true; break; }
+                                        - if (cc.childs) {
+                                            - for (var ccc of cc.childs) {
+                                                - if (isChecked(String(ccc.id))) { showParent = true; break; }
+                                            - }
+                                        - }
+                                    - }
+                                - }
+                            - }
+                        - }
+
+                        .permission-section
+                          .permission-header
+                            h3 #{service.name}
+                            input.toggle-switch.toggle-parent(
+                              type="checkbox"
+                              data-service=service.id
+                              data-target=parentId
+                              data-default=service.is_default
+                              checked=isChecked(String(service.id)) ? true : false
+                            )
+
+                          .checkbox-group(id=parentId style=(showParent ? '' : 'display: none'))
+                            each SubService, cIndex in service.childs
+                              - const childId = `${parentId}-child-${cIndex}`
+                              - var showChild = false;
+                              - if (SubService.childs) {
+                                  - for (var cc of SubService.childs) {
+                                      - if (isChecked(cc.id)) { showChild = true; break; }
+                                      - if (cc.childs) {
+                                          - for (var ccc of cc.childs) {
+                                              - if (isChecked(ccc.id)) { showChild = true; break; }
+                                          - }
+                                      - }
+                                  - }
+                              - }
+
+                              .child-wrapper
+                                label.label-preminssion
+                                  input.toggle-child(
+                                    type="checkbox"
+                                    data-service=SubService.id
+                                    data-target=childId
+                                    data-default=SubService.is_default
+                                    checked=isChecked(SubService.id) ? true : false
+                                  )
+                                  | #{SubService.name}
+
+                                if SubService.childs && SubService.childs.length
+                                  .sub-child-wrapper(id=childId style=(showChild ? '' : 'display: none'))
+                                    each SubSub, ssIndex in SubService.childs
+                                      - const subChildId = `${childId}-sub-${ssIndex}`
+                                      - var showSub = false;
+                                      - if (SubSub.childs) {
+                                          - for (var ccc of SubSub.childs) {
+                                              - if (isChecked(ccc.id)) { showSub = true; break; }
+                                          - }
+                                      - }
+
+                                      .sub-childs
+                                        label.label-preminssion
+                                          input.toggle-sub-child(
+                                            type="checkbox"
+                                            data-service=SubSub.id
+                                            data-target=subChildId
+                                            data-default=SubSub.is_default
+                                            style="margin-left: 20px"
+                                            checked=isChecked(SubSub.id) ? true : false
+                                          )
+                                          | #{SubSub.name}
+
+                                        if SubSub.childs && SubSub.childs.length
+                                          .sub-sub-childs(id=subChildId style=(showSub ? '' : 'display: none'))
+                                            each SubSubSub in SubSub.childs
+                                              label.label-preminssion(style="margin-left: 40px; background:#eaeeed; padding:10px; border-radius:8px;")
+                                                input.toggle-sub-child-sub(
+                                                  type="checkbox"
+                                                  data-service=SubSubSub.id
+                                                  data-default=SubSubSub.is_default
+                                                  checked=isChecked(SubSubSub.id) ? true : false
+                                                )
+                                                | #{SubSubSub.name}
+  script(src='https://code.jquery.com/jquery-3.6.0.min.js')
+  script(src="https://unpkg.com/sweetalert/dist/sweetalert.min.js")
+  script.
+    $(document).ready(function () {
+      $(document).on('change', '.toggle-parent, .toggle-child, .toggle-sub-child, .toggle-sub-child-sub', function () {
+        const $this = $(this);
+        const target = $this.data('target');
+        const isChecked = $this.is(':checked');
+
+        if (target) {
+          $('#' + target).toggle(isChecked);
+
+          if (isChecked) {
+            $('#' + target).find('input[type="checkbox"]').each(function () {
+              const isDefault = $(this).data('default');
+              if (isDefault == '1' || isDefault === 1) {
+                $(this).prop('checked', true);
+                const nestedTarget = $(this).data('target');
+                if (nestedTarget) {
+                  $('#' + nestedTarget).show();
+                }
+                sendPermissionUpdate($(this));
+              }
+            });
+          } else {
+            $('#' + target).find('input[type="checkbox"]').each(function () {
+              $(this).prop('checked', false);
+              const nestedTarget = $(this).data('target');
+              if (nestedTarget) {
+                $('#' + nestedTarget).hide();
+              }
+              sendPermissionUpdate($(this));
+            });
+          }
+        }
+
+        sendPermissionUpdate($this);
+      });
+
+      function sendPermissionUpdate($checkbox) {
+        console.log("kulshdfgsdf")
+        const userId = $('input[name="userid"]').val();
+        const serviceId = $checkbox.data('service');
+        const isChecked = $checkbox.is(':checked') ? 1 : 0;
+
+        if (!serviceId || !userId) {
+          console.error("Missing serviceId or userId");
+          return;
+        }
+
+        console.log("Sending:", { userid: userId, service_id: serviceId, status: isChecked });
+
+        $.ajax({
+          url: '/admin/save-permissions',
+          method: 'POST',
+          data: {
+            userid: userId,
+            service_id: serviceId,
+            status: isChecked
+          },
+          success: function (res) {
+            console.log("Permission updated:", res);
+            swal({
+              title: "Success!",
+              text: "Permission updated",
+              icon: "success",
+              timer: 1000,
+              buttons: false
+            });
+          },
+          error: function (err) {
+            console.error('Update failed:', err);
+            swal({
+              title: "Error!",
+              text: "Update failed",
+              icon: "error",
+              timer: 1500,
+              buttons: false
+            });
+          }
+        });
+      }
+
+      // Hide unchecked parents' children on load
+      $('.toggle-parent, .toggle-child, .toggle-sub-child').each(function () {
+        const target = $(this).data('target');
+        if (target && !$(this).is(':checked')) {
+          $('#' + target).hide();
+        }
+      });
+    });

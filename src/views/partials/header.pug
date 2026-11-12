@@ -1,0 +1,57 @@
+.header(role="banner")
+  .top-header
+    .row.justify-content-between.align-items-center.w-100.m-0
+      //- Left: hamburger + logo
+      .col-6.col-sm-4.col-lg-4.col-xl-3.px-0
+        .d-flex.align-items-center.gap-2
+          button.sidebar-collapse(type="button" aria-label="Toggle sidebar" aria-controls="mainSidebar" aria-expanded="true")
+            i.bi.bi-list(aria-hidden="true")
+          .logo
+            .logo-big
+              a(href="/" target="_blank" aria-label="Sanchay Home")
+                img#logoBig(src="/assets/images/logo.png" alt="Sanchay logo" loading="lazy")
+
+      //- Right: user actions
+      .col-6.col-sm-8.col-lg-8.col-xl-9.px-0
+        .top-right
+          nav.navbar.navbar-expand(aria-label="User actions")
+            .navbar-collapse#navbarSupportedContent
+              ul.navbar-nav.ms-auto.align-items-center
+
+                //- User greeting (hidden on small screens)
+                if currentUser
+                  li.nav-item.d-none.d-md-flex.align-items-center.me-2
+                    span.user-greeting
+                      | Hello,&nbsp;
+                      strong= currentUser.name || 'User'
+
+                //- Profile dropdown
+                li.nav-item.dropdown
+                  button.profile-dropdown(
+                    type="button"
+                    id="dropdownMenuButton3"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label="User menu"
+                    title="Account"
+                  )
+                    i.bi.bi-person-fill(aria-hidden="true")
+                  ul.dropdown-menu.dropdown-menu-end(aria-labelledby="dropdownMenuButton3")
+                    if currentUser
+                      li.dropdown-user-info
+                        .d-flex.align-items-center.gap-2.px-3.py-2
+                          .user-avatar-sm
+                            i.bi.bi-person-circle(aria-hidden="true")
+                          .user-meta
+                            div.fw-bold.text-dark.lh-sm= currentUser.name || 'User'
+                            div.text-muted.small= currentUser.role || ''
+                      li
+                        hr.dropdown-divider.my-1
+                    li
+                      a.dropdown-item(href="/user/my-profile")
+                        i.bi.bi-person-badge-fill(aria-hidden="true")
+                        | &nbsp;Profile
+                    li
+                      a.dropdown-item.text-danger(href="/user/logout")
+                        i.bi.bi-box-arrow-right(aria-hidden="true")
+                        | &nbsp;Logout

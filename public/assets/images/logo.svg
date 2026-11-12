@@ -1,0 +1,5 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="64" cy="64" r="60" fill="#1e3c72"></circle>
+  <path d="M64 20 L100 100 H28 Z" fill="#ffffff"></path>
+  <text x="50%" y="90%" font-size="18" font-family="Segoe UI, sans-serif" fill="#ffffff" text-anchor="middle">AD</text>
+</svg>

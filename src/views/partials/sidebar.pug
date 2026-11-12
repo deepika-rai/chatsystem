@@ -1,0 +1,39 @@
+- const userRole = currentUser ? currentUser.role : 'staff'
+- const isAdmin  = userRole === 'admin'
+
+nav.fixed-sidebar.sidebar-mini(aria-label="Main navigation")
+  .menu
+    .sidebar-menu
+      ul(role="menu")
+
+        //- ── Dashboard ── visible to all
+        li.sidebar-item(role="none")
+          a.sidebar-link(href="/user/dashboard" role="menuitem" data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard")
+            i.bi.bi-speedometer2(aria-hidden="true")
+            span Dashboard
+
+        //- ── Chat ── visible to all
+        li.sidebar-item(role="none")
+          a.sidebar-link(href="/chat" role="menuitem" data-bs-toggle="tooltip" data-bs-placement="right" title="Chat" class=(currentPath && currentPath.startsWith('/chat')) ? 'active' : '')
+            i.bi.bi-chat-dots(aria-hidden="true")
+            span Chat         
+
+        //- ── Admin-only single items
+        if isAdmin
+          li.sidebar-item(role="none")
+            a.sidebar-link(href="/user/list" role="menuitem" data-bs-toggle="tooltip" data-bs-placement="right" title="Users")
+              i.bi.bi-people(aria-hidden="true")
+              span Users
+
+        //- ── Settings ── visible to all
+        li.sidebar-item.has-sub(role="none")
+          a.sidebar-link(href="#" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false")
+            i.bi.bi-gear(aria-hidden="true")
+            span Settings
+          ul.sub-menu(role="menu")
+            li(role="none")
+              a.sub-menu-item(href="/user/my-profile" role="menuitem")
+                | My Profile
+            li(role="none")
+              a.sub-menu-item(href="/user/update-password" role="menuitem")
+                | Change Password

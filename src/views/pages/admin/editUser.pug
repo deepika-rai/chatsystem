@@ -1,0 +1,82 @@
+extends ../../layouts/main
+
+block content
+  section.main-content-box
+    .breadcrumb-arae-bxo.d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
+      //- Page Title (first)
+      h3.page-title.text-primary.mb-0 Edit User
+
+      //- Back Button (right side, same line)
+      a.hero-btn.br-btn.common-btn.warpper-btn.d-flex.align-items-center.gap-1(href=`/user/list` title="Back to services")
+        i.bi.bi-arrow-left
+        | Back
+
+    .row
+      .col-xl-12.col-lg-12
+        .panel.mb-g.shadow-sm.rounded
+          .panel-body
+            .product-status
+              form#employeeFilterForm(action="/user/updateUser" method="POST")
+                .row.align-items-center.filterformpay-inner
+
+                  //- Name
+                  .col-lg-6.col-md-6.col-sm-6.mb-3
+                    .employee-search-arae-box
+                        label.floating-label-inner(for="name") Name 
+                            span.text-danger * 
+                        input#name.form-control(
+                            type="text", 
+                            name="name", 
+                            autocomplete="off", 
+                            placeholder="Enter full name", 
+                            value=(user ? user.name : ''),
+                            required
+                        )
+                        input#id(type="hidden", name="id", value=user.id)
+
+                  .col-lg-6.col-md-6.col-sm-6.mb-3
+                    .employee-search-arae-box
+                        label.floating-label-inner(for="email") Email 
+                            span.text-danger * 
+                        input#name.form-control(
+                            type="email", 
+                            name="email", 
+                            autocomplete="off", 
+                            placeholder="Enter email", 
+                            value=(user ? user.email : ''),                            
+                            required
+                        )
+
+                  .col-lg-6.col-md-6.col-sm-6.mb-3
+                    .employee-search-arae-box
+                        label.floating-label-inner(for="phone") Phone Number 
+                            span.text-danger * 
+                        input#name.form-control(
+                            type="tel",
+                            pattern="[0-9]{10}",
+                            maxlength="10", 
+                            name="mobile", 
+                            autocomplete="off", 
+                            placeholder="Enter phone", 
+                             value=(user ? user.phone : ''),                            
+                            required
+                        )
+
+                  //- Status
+                  .col-lg-6.col-md-6.col-sm-6.mb-3
+                    .employee-search-arae-box
+                        label.floating-label-inner(for="status") Status 
+                        span.text-danger *
+                        select#status.form-control-select(name="status", required)
+                            option(value='active', selected=user.status == 'active') Active
+                            option(value='inactive', selected=user.status == 'inactive') Inactive
+
+                  //- Action Buttons
+                  .col-lg-12.col-md-12.col-sm-12.mt-4
+                    .d-flex.align-items-center.gap-3.justify-content-end
+                      button.hero-btn.common-btn.warpper-btn.d-flex.align-items-center.gap-1(type="submit") 
+                        i.bi.bi-check-circle
+                        | Update
+                      a.hero-btn.br-btn.common-btn.warpper-btn.d-flex.align-items-center.gap-1(href="/user/list")
+                        i.bi.bi-x-circle
+                        | Cancel

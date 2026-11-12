@@ -1,0 +1,201 @@
+extends ../../layouts/main
+
+block content
+  .container-fluid.dashboard-container
+    //- Notification + Export button
+    .d-flex.justify-content-between.align-items-center.mb-3.flex-wrap.gap-2
+      //- Pending stock request notification (left side)
+      if isAdmin && pendingStockCount > 0
+        .stock-notification-bar.d-flex.align-items-center.gap-2
+          .notification-icon-wrap
+            i.bi.bi-bell-fill
+          .notification-text
+            strong You have #{pendingStockCount} pending stock #{pendingStockCount === 1 ? 'request' : 'requests'}
+            p.mb-0.small.text-muted
+              | Review and take action on the pending requests.
+              |
+              a.ms-1(href="/stock-request/list" title="View Requests" style="text-decoration:underline; color:#d98c00; font-weight:600;")
+                | View Request
+      else
+        div
+
+
+    .row.g-3
+      // Total Inventory
+      .col-md-3
+        .card.metric-card.shadow-sm.position-relative.bg-white
+          .card-body.p-4
+            .d-flex.justify-content-between.align-items-center
+              .left
+                h6.text-muted.mb-1 Total Inventory
+                h3.mb-0.fw-bold #{totalInventory || 0}
+              .right
+                .icon-wrapper.bg-success.text-white.rounded-circle.d-flex.align-items-center.justify-content-center
+                  i.bi.bi-box-seam.fs-3
+              
+      // Total Requests
+      .col-md-3
+        .card.metric-card.shadow-sm.position-relative.bg-white
+          .card-body.p-4
+            .d-flex.justify-content-between.align-items-center
+              .left
+                h6.text-muted.mb-1 Total Requests
+                h3.mb-0.fw-bold #{totalRequests || 0}
+              .right
+                .icon-wrapper.bg-primary.text-white.rounded-circle.d-flex.align-items-center.justify-content-center
+                  i.bi.bi-clipboard-check.fs-3
+
+      // Total Pending Requests
+      .col-md-3
+        .card.metric-card.shadow-sm.position-relative.bg-white
+          .card-body.p-4
+            .d-flex.justify-content-between.align-items-center
+              .left
+                h6.text-muted.mb-1 Pending Requests
+                h3.mb-0.fw-bold #{totalPendingRequests || 0}
+              .right
+                .icon-wrapper.bg-warning.text-white.rounded-circle.d-flex.align-items-center.justify-content-center
+                  i.bi.bi-hourglass-split.fs-3
+
+      // Total Users
+      .col-md-3
+        .card.metric-card.shadow-sm.position-relative.bg-white
+          .card-body.p-4
+            .d-flex.justify-content-between.align-items-center
+              .left
+                h6.text-muted.mb-1 Total Users
+                h3.mb-0.fw-bold #{totalUser || 0}
+                //-  #{pendingStockCount}
+              .right
+                .icon-wrapper.bg-purple.text-white.rounded-circle.d-flex.align-items-center.justify-content-center
+                  i.bi.bi-people-fill.fs-3
+
+
+        
+
+  style.
+    .metric-card {
+      border-radius: 4px;
+      transition: background 0.2s ease;
+      overflow: hidden;
+    }
+    .metric-card:hover {
+      filter: brightness(0.97);
+    }
+    .icon-wrapper {
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+    }
+    .bg-success { background-color: #16a34a!important; }
+    .bg-primary { background-color: #0ea5e9!important; }
+    .bg-warning { background-color: #f59e0b!important; }
+    .bg-purple { background-color: #8b5cf6!important; }
+    h6.text-muted { font-size: 0.875rem; letter-spacing: 0.5px; }
+    h3.fw-bold { font-size: 1.75rem; }
+
+  script(src="https://cdn.jsdelivr.net/npm/apexcharts")
+  script.
+  
+
+block scripts
+  script.
+    (function () {
+      var highData = !{JSON.stringify((topHighStock || []).map(function(p){ return { name: p.name, stock: p.stock || 0 }; }))};
+      var lowData  = !{JSON.stringify((topLowStock  || []).map(function(p){ return { name: p.name, stock: p.stock || 0 }; }))};
+
+      var highChart = null;
+      var lowChart  = null;
+
+      function makeChart(elId, data, color, label) {
+        var el = document.getElementById(elId);
+        if (!el || typeof ApexCharts === 'undefined') return null;
+
+        var chart = new ApexCharts(el, {
+          chart: {
+            type: 'bar',
+            height: 280,
+            toolbar: { show: false },
+            fontFamily: 'Segoe UI, sans-serif'
+          },
+          series: [{
+            name: label,
+            data: data.map(function(p){ return p.stock; })
+          }],
+          colors: [color],
+          xaxis: {
+            categories: data.map(function(p){ return p.name; }),
+            labels: {
+              rotate: -35,
+              style: { fontSize: '11px' },
+              trim: true,
+              maxHeight: 90
+            }
+          },
+          yaxis: {
+            title: { text: 'Stock Qty', style: { fontSize: '11px', color: '#94a3b8' } },
+            labels: { formatter: function(v){ return Math.round(v); } }
+          },
+          plotOptions: {
+            bar: {
+              borderRadius: 5,
+              columnWidth: '55%',
+              dataLabels: { position: 'top' }
+            }
+          },
+          dataLabels: {
+            enabled: true,
+            formatter: function(v){ return v; },
+            style: { fontSize: '11px', colors: ['#334155'] },
+            offsetY: -20
+          },
+          tooltip: {
+            y: { formatter: function(v){ return v + ' units'; } }
+          },
+          legend: { show: false },
+          grid: { borderColor: '#f1f5f9', strokeDashArray: 4 }
+        });
+        chart.render();
+        return chart;
+      }
+
+      function updateChart(chartObj, elId, data, color, label) {
+        if (!chartObj) return makeChart(elId, data, color, label);
+        chartObj.updateOptions({
+          series: [{ name: label, data: data.map(function(p){ return p.stock; }) }],
+          xaxis:  { categories: data.map(function(p){ return p.name; }) }
+        });
+        return chartObj;
+      }
+
+      function fetchChartData(chartType, typeId, callback) {
+        var url = '/user/stock-chart-data?chartType=' + chartType + (typeId ? '&typeId=' + typeId : '');
+        fetch(url, { credentials: 'same-origin' })
+          .then(function(r){ return r.json(); })
+          .then(function(res){
+            if (res.status) callback(res.data);
+          })
+          .catch(function(err){ console.error('Chart fetch error:', err); });
+      }
+
+      // Initial render
+      highChart = makeChart('highStockChart', highData, '#0EA5E9', 'Stock Qty');
+      lowChart  = makeChart('lowStockChart',  lowData,  '#f87171', 'Stock Qty');
+
+      // High stock filter
+      document.getElementById('highTypeFilter').addEventListener('change', function() {
+        var typeId = this.value;
+        fetchChartData('high', typeId, function(data) {
+          highChart = updateChart(highChart, 'highStockChart', data, '#0EA5E9', 'Stock Qty');
+        });
+      });
+
+      // Low stock filter
+      document.getElementById('lowTypeFilter').addEventListener('change', function() {
+        var typeId = this.value;
+        fetchChartData('low', typeId, function(data) {
+          lowChart = updateChart(lowChart, 'lowStockChart', data, '#f87171', 'Stock Qty');
+        });
+      });
+
+    })();

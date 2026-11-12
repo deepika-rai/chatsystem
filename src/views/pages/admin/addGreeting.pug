@@ -1,0 +1,53 @@
+extends ../../layouts/main
+
+block content
+  section.main-content-box
+    .breadcrumb-arae-bxo.d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
+      //- Page Title (first)
+      h3.page-title.text-primary.mb-0 Add Greeting  
+
+      //- Back Button (right side, same line)
+      a.hero-btn.br-btn.common-btn.warpper-btn.d-flex.align-items-center.gap-1(href=`/status-upload/list` title="Back to Greeting")
+        i.bi.bi-arrow-left
+        | Back
+
+    .row
+      .col-xl-12.col-lg-12
+        .panel.mb-g.shadow-sm.rounded
+          .panel-body
+            .product-status
+              form#employeeFilterForm(method="POST", action="/status-upload/create")
+                .row.align-items-center.filterformpay-inner
+
+                  //- Name
+                  .col-lg-6.col-md-6.col-sm-6.mb-3
+                    .employee-search-arae-box
+                      label.floating-label-inner(for="name") Greeting Text 
+                        span.text-danger * 
+                      input#name.form-control(
+                        type="text", 
+                        name="greetingText", 
+                        autocomplete="off", 
+                        placeholder="Enter Greeting Text", 
+                        required
+                      )
+
+                  //- Status
+                  .col-lg-6.col-md-6.col-sm-6.mb-3
+                    .employee-search-arae-box
+                      label.floating-label-inner(for="status") Status 
+                        span.text-danger *
+                      select#status.form-control-select(name="status", required)
+                        option(value='') Select Status
+                        option(value='Active') Active
+                        option(value='Inactive') Inactive
+
+                  //- Action Buttons
+                  .col-lg-12.col-md-12.col-sm-12.mt-4
+                    .d-flex.align-items-center.gap-3.justify-content-end
+                      button.hero-btn.common-btn.warpper-btn.d-flex.align-items-center.gap-1(type="submit") 
+                        i.bi.bi-check-circle
+                        | Save
+                      a.hero-btn.br-btn.common-btn.warpper-btn.d-flex.align-items-center.gap-1(href="/status-upload/list")
+                        i.bi.bi-x-circle
+                        | Cancel

@@ -1,0 +1,78 @@
+extends ../../layouts/main
+
+block content
+  section.main-content-box
+    .breadcrumb-arae-bxo.d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
+      h3.page-title.text-primary.mb-0 Send Notification  
+      a.hero-btn.br-btn.common-btn.warpper-btn.d-flex.align-items-center.gap-1(href=`/user/list` title="Back to User Lists")
+        i.bi.bi-arrow-left
+        | Back
+
+    .row.justify-content-center
+      .col-xl-12.col-lg-12
+        .panel.mb-g.shadow-sm.rounded
+          .panel-body
+            .product-status
+              form#employeeFilterForm(method="POST", action="/user/sendNotification")
+                .row.align-items-center.filterformpay-inner.justify-content-center
+
+                  .col-lg-8.col-md-8.col-sm-8.mb-3
+                    .employee-search-arae-box
+                      label.floating-label-inner(for="subject") Subject  
+                        span.text-danger *
+                      input(type="hidden", name="user_id", value=id)
+                      select#subject.form-control-select(name="subject", required)
+                        option(value='') Select Subject
+                        option(value="Account Deactivation Notice") Account Deactivation Notice
+                        option(value="Your Account Has Been Deactivated") Your Account Has Been Deactivated
+                        option(value="Important: Account Status Update") Important: Account Status Update
+                        option(value="Notice: Your Access Has Been Temporarily Disabled") Notice: Your Access Has Been Temporarily Disabled
+                        option(value="Account Update: Deactivation Notification") Account Update: Deactivation Notification
+                        option(value="Temporary Account Deactivation Notice") Temporary Account Deactivation Notice
+                        option(value="Account Deactivated") Account Deactivated
+                        option(value="Access Disabled") Access Disabled
+                        option(value="Account Inactive") Account Inactive
+                        option(value="Deactivation Alert") Deactivation Alert
+                        option(value="Important Account Information") Important Account Information
+                        option(value="Policy Update Notification") Policy Update Notification
+                        option(value="Other") Other
+
+
+                  //- other message input (hidden by default)
+                  .col-lg-8.col-md-8.col-sm-8.mb-3#otherMessageBox(style="display:none; margin:auto;")
+                    .employee-search-arae-box
+                      label.floating-label-inner(for="other_message") Enter Other Message
+                        span.text-danger *
+                      input#other_message.form-control(
+                        type="text", 
+                        name="other_message", 
+                        autocomplete="off", 
+                        placeholder="Enter your message"
+                      )
+                    
+
+                  .col-lg-12.col-md-12.col-sm-12.mt-4
+                    .d-flex.align-items-center.gap-3.justify-content-end
+                      button.hero-btn.common-btn.warpper-btn.d-flex.align-items-center.gap-1(type="submit") 
+                        i.bi.bi-check-circle
+                        | Send
+                      a.hero-btn.br-btn.common-btn.warpper-btn.d-flex.align-items-center.gap-1(href="/user/list")
+                        i.bi.bi-x-circle
+                        | Cancel
+
+  script(src='https://code.jquery.com/jquery-3.6.0.min.js')
+  script.
+    $(document).ready(function() {
+      $('#subject').on('change', function() {
+        var other = $(this).val();
+        if ($(this).val() === 'Other') {
+          $('#otherMessageBox').show();
+          $('#other_message').prop('required', true);
+          $('#message').prop('required', false);
+        } else {
+          $('#otherMessageBox').hide();
+          $('#other_message').prop('required', false);
+          $('#message').prop('required', true);
+        }
+      });
+    });

@@ -1,0 +1,39 @@
+CREATE TABLE `chats` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `type` ENUM('direct', 'group') NOT NULL,
+    `name` VARCHAR(100) DEFAULT NULL,
+    `image` TEXT DEFAULT NULL,
+    `directKey` VARCHAR(50) DEFAULT NULL,
+    `createdBy` INT NOT NULL,
+    `lastMessage` TEXT DEFAULT NULL,
+    `lastMessageAt` DATETIME DEFAULT NULL,
+    `createdAt` DATETIME NOT NULL,
+    `updatedAt` DATETIME NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_directKey` (`directKey`)
+);
+
+CREATE TABLE `chat_members` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `chatId` INT NOT NULL,
+    `userId` INT NOT NULL,
+    `role` ENUM('admin', 'member') DEFAULT 'member',
+    `isMuted` BOOLEAN DEFAULT FALSE,
+    `lastReadAt` DATETIME DEFAULT NULL,
+    `joinedAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `leftAt` DATETIME DEFAULT NULL,
+    `createdAt` DATETIME NOT NULL,
+    `updatedAt` DATETIME NOT NULL,
+
+    PRIMARY KEY (`id`),
+
+    UNIQUE KEY `unique_chat_user` (`chatId`, `userId`),
+
+    CONSTRAINT `fk_chat_members_chat`
+        FOREIGN KEY (`chatId`) REFERENCES `chats` (`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT `fk_chat_members_user`
+        FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);

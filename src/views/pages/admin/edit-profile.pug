@@ -1,0 +1,44 @@
+extends ../../layouts/main
+
+block content
+  section.main-content-box
+    .breadcrumb-area-box.d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
+      .breadcrumb-area-box.d-flex.flex-column.gap-1
+    .row.justify-content-center.mt-5
+      .col-xl-8.col-lg-10
+        .panel.mb-g
+          .panel-heading
+            .profile-card-box.pb-4
+              .form.position-relative
+                .profile-images.mb-3
+                  .avatar-profile
+                    .image-upload
+                      label(for="image-input").text-center
+                        i.bi.bi-cloud-arrow-up
+                        br
+                        span Select an image file
+                      input#image-input(type="file" accept="image/jpeg, image/png, image/gif")
+
+                .btn-group.mb-2.d-flex.justify-content-center.align-items-center.form-group-btn
+                  button.btn.btn-primary.me-2(type="button") Edit profile
+                  button.btn.btn-primary.me-2(type="button") Update
+
+                .mb-1.text-start
+                  label.label-inner-text(for="userId") User ID:
+                  input#userId.form-control-inner-input(type="text" placeholder="Enter User ID")
+
+                .mb-2.text-start
+                  label.label-inner-text(for="userName") Name:
+                  input#userName.form-control-inner-input(type="text" placeholder="Enter User Name")
+
+                .row.mb-1
+                  .col-md-6
+                    label.label-inner-text(for="email") Email:
+                    input#email.form-control-inner-input(type="email" placeholder="Enter User Email")
+                  .col-md-6
+                    label.label-inner-text(for="phone") Phone:
+                    input#phone.form-control-inner-input(type="tel" placeholder="Enter User Phone Number")
+
+                .mb-1.text-start
+                  label.label-inner-text(for="address") Address:
+                  input#address.form-control-inner-input(type="text" placeholder="Enter User Address")

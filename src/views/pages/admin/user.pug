@@ -1,0 +1,198 @@
+extends ../../layouts/main
+
+block content
+  section.dashboard-main-content
+    .breadcrumb-arae-bxo.d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
+      .breadcrumb-icon-box.d-flex.gap-3.align-items-center
+        a.icon-box-in-top(href="javascript:void(0)" data-bs-placement="top" tabindex="0" title="Customer") 
+          i.bi.bi-people
+        a.breadcrumb-icon-box.text-black(href="javascript:void(0)" data-bs-placement="top" tabindex="0" title="user")
+          | User List
+      .d-flex.align-items-center.gap-4.justify-content-end.flex-wrap
+        .total-lead-inner-bxo
+          h4 Total Users: 
+          span.lead-count-box 
+            if users && users.length
+              | #{users.length}
+            else
+              | 0
+        a.hero-btn.common-btn.warpper-btn.text-white(href="/user/add-user" title="Add User")
+          i.bi.bi-plus-lg.me-1
+          | Add User       
+        a.hero-btn.common-btn.warpper-btn.text-white(href="/user/archived-users" title="Archived Users")
+          i.bi.bi-list.me-1
+          | Archived Users 
+
+    .row
+      .col-xl-12.col-lg-12
+        .panel.mb-g
+          .panel-heading
+          .panel-body
+            .product-status
+              .table-responsive.table-size
+                table#pagination.table.table-bordered.table-striped.align-middle
+                  thead.table-bg-warpper
+                    tr
+                      th.text-start #
+                      th.text-start Name
+                      th.text-start Email
+                      th.text-start Phone
+                      th.text-start Status
+                      th.text-start Action
+                  tbody.table-bg-warpper-inner
+                    if users && users.length
+                      each data, i in users
+                        tr
+                          td.text-start #{i + 1}
+                          
+                          // User Name
+                          td.text-start
+                            div 
+                              a(href=`/report/inventory/${data.id}`) 
+                                if data.name
+                                  | #{data.name}
+                                else
+                                  | N/A
+
+                          // Email
+                          td.text-start
+                            if data.email
+                              | #{data.email}
+                            else
+                              | N/A
+
+                          // Phone
+                          td.text-start
+                            if data.phone
+                              | #{data.phone}
+                            else
+                              | N/A                                     
+                          
+                          // Status
+                          td.text-start
+                            if data.status === 'active'
+                              span.table-status-btn Active
+                            else
+                              span.inactive-status Inactive
+                          
+                          
+                          // Actions
+                          td.text-start
+                            .d-flex.justify-content-start.align-items-center.gap-2
+                              a(href="#", title=(data.status == 'active' ? 'Active - Click to Inactive' : 'Inactive - Click to Active'), class="status-icon",data-id=data.id,data-status=data.status,id=`toggle-${data.id}`)
+                                if data.status == 'active'
+                                  i.bi.bi-check-circle-fill.text-success
+                                else 
+                                  i.bi.bi-x-circle-fill.text-danger
+                              //- a(href=`/user/notification/${data.id}`, title='Send Notification', onclick=`openUserModal(${data.id})`)
+                              //-   i.bi.bi-chat-text
+                              a(href=`/user/edit-user/${data.id}`, title='Edit User')
+                                i.bi.bi-pencil
+                              a(href='#' data-bs-toggle='modal' data-bs-target=`#deleteModal-${data.id}` title='Delete')
+                                i.bi.bi-trash.text-danger
+                              a.update-btn(
+                                  href="javascript:void(0)",
+                                  onclick=`openPasswordModal(${data.id})`
+                                  title="change password"
+                              )
+                                  i.bi.bi-pen
+                          
+                        // Delete Modal
+                        .modal.fade(id=`deleteModal-${data.id}` tabindex='-1' aria-labelledby=`deleteModalLabel-${data.id}` aria-hidden='true')
+                          .modal-dialog.modal-dialog-centered
+                            .modal-content
+                              .modal-header
+                                h5.modal-title(id=`deleteModalLabel-${data.id}`) Confirm Delete
+                                button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+                              .modal-body.modal-body-inner
+                                img(src="/assets/images/deleteLogo.png", alt="trash")
+                                p Are you sure you want to delete user <b>#{data.name}</b>?
+                              .modal-footer
+                                button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+                                a.btn.btn-danger(href=`/user/delete/${data.id}`) Delete
+                    else
+                      tr
+                        td.text-start(colspan="8") No records found
+
+    //  password modal
+    .modal.fade#passwordModal(tabindex='-1' aria-hidden='true')
+        .modal-dialog.modal-dialog-centered
+            .modal-content
+                .modal-header
+                    h5.modal-title Update Password
+                    button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+                .modal-body.modal-body-inner
+                    input#user_id(type="hidden")
+                    input#password.form-control(
+                        type="text"
+                        min=8,
+                        placeholder="Enter New password"
+                        required
+                    )
+                    span.text-danger Password must be at least 8 characters
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+                    button#confirmUpdateBtn.btn.btn-success(type="button") Update
+
+block scripts
+  script.
+    // Toggle active/inactive status
+    document.querySelectorAll('.status-icon').forEach(function(icon) {
+      icon.addEventListener('click', function(e) {
+        e.preventDefault();
+        var Id = icon.getAttribute('data-id');
+        var currentStatus = icon.getAttribute('data-status');
+        var newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+        fetch('/user/update-status/' + Id, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          console.log("Status updated:", data);
+          location.reload();
+        })
+        .catch(function(err) {
+          console.error(err);
+          alert("Failed to update status");
+        });
+      });
+    });
+
+    // Open password modal
+    function openPasswordModal(id) {
+      document.getElementById("user_id").value = id;
+      document.getElementById("password").value = "";
+      var modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+      modal.show();
+    }
+
+    // Update password on confirm
+    document.getElementById("confirmUpdateBtn").addEventListener("click", function() {
+      var password = document.getElementById("password").value;
+      var user_id = document.getElementById("user_id").value;
+
+      if (!password || !password.trim()) {
+        window.location.href = "/user/list?error=" + encodeURIComponent("Please enter a new password");
+        return;
+      }
+
+      fetch("/user/update-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: user_id, password: password })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.success) {
+          window.location.href = "/user/list?success=" + encodeURIComponent(data.message);
+        } else {
+          window.location.href = "/user/list?error=" + encodeURIComponent(data.message || "Update failed");
+        }
+      })
+      .catch(function(err) {
+        console.error(err);
+        window.location.href = "/user/list?error=" + encodeURIComponent("Something went wrong. Please try again.");
+      });
+    });

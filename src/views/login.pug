@@ -1,0 +1,225 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Login - My Notebook
+    style.
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        background: linear-gradient(
+          198deg,
+          #38BDF8 0%,
+          #0EA5E9 50%,
+          #0284C7 100%
+        );
+      }
+
+      body::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 50%),
+                    radial-gradient(circle at 70% 70%, rgba(255,255,255,0.15), transparent 50%);
+        animation: float 15s infinite alternate;
+        z-index: 0;
+      }
+
+      @keyframes float {
+        0% { transform: translate(0,0) scale(1); }
+        50% { transform: translate(20px, 20px) scale(1.05); }
+        100% { transform: translate(-20px, 20px) scale(1); }
+      }
+
+      .login-card {
+        position: relative;
+        background: #ffffffee;
+        padding: 40px 30px;
+        border-radius: 20px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        width: 380px;
+        max-width: 95%;
+        text-align: center;
+        z-index: 1;
+        animation: fadeIn 1s ease forwards;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .header-logo img {
+        width: 200px;
+        margin-bottom: 20px;
+      }
+
+      h2 {
+        color: #0EA5E9;
+        font-size: 28px;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      p {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 25px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        color: #374151;
+        font-weight: 500;
+      }
+
+      input[type="email"],
+      input[type="password"] {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      input[type="text"] {
+        width: 40%;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      input:focus {
+        border-color: #4cb050;
+        box-shadow: 0 0 10px rgba(76, 176, 80, 0.3);
+        transform: scale(1.02);
+      }
+
+      .btn-signin {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(
+            198deg,
+            #38BDF8,
+            #0EA5E9,
+            #0284C7
+        );
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top:20px
+      }
+      .mb-0{
+        margin-bottom:0px;
+      }
+
+      .btn-signin:hover {
+        background: linear-gradient(
+          198deg,
+          #38BDF8,
+          #0EA5E9,
+          #0284C7
+      );
+        transform: scale(1.05);
+      }
+
+      .alert {
+        animation: slideDown 0.5s ease forwards;
+      }
+
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+    script(src="https://cdn.jsdelivr.net/npm/sweetalert2@11")
+  body
+  .login-card
+    .header-logo
+      img(src='/assets/images/logo.png', alt='My Notebook')
+    p Please sign in to continue.
+
+    form(action="/user/signIn", method="post")
+      .form-group
+        label(for="email") Email
+        input#email(type="email", name="email", required, placeholder="Your Email Address")
+
+      .form-group
+        label(for="password") Password
+        input#password(type="password", name="password", required, placeholder="Password")
+
+      .form-group.mb-0
+        label(for="captcha") Enter CAPTCHA
+
+        .d-flex.align-items-center(style="gap:10px")
+          img#captchaImg(
+            src="/user/captcha"
+            alt="CAPTCHA"
+            style="height:45px;border:1px solid #ccc;border-radius:4px;"
+          )
+          button(
+            type="button"
+            id="refreshCaptcha"
+            style="border:none;background:none;font-size:20px;cursor:pointer;"
+          ) ↻
+
+      .form-group.mb-0
+        input#captcha(
+          type="text"
+          name="captcha"
+          placeholder="Enter Captcha"
+          required
+        )
+
+      .form-group
+        button.btn-signin(type="submit") Sign In
+      p 
+       a(href="/", rel="noopener noreferrer" style="color: #6b7280;") Back to Home 
+
+    if error.length
+      script.
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: '!{error[0]}'
+        });
+    if success.length
+      script.
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: '!{success[0]}'
+        });
+
+  script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+  script.
+    document.getElementById("refreshCaptcha").addEventListener("click", function () {
+        document.getElementById("captchaImg").src = "/user/captcha?" + Date.now();
+    });
